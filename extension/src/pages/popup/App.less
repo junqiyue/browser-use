@@ -1,0 +1,44 @@
+.popup-container {
+  width: 400px;
+  min-height: 400px;
+
+  .header {
+    background: #fff;
+    padding: 16px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #1890ff;
+    }
+  }
+
+  .content {
+    padding: 16px;
+    background: #fff;
+
+    .ant-input {
+      margin-bottom: 8px;
+    }
+
+    .ant-space-compact {
+      display: flex;
+      justify-content: space-between;
+
+      .ant-btn {
+        flex: 1;
+        margin: 0 4px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}

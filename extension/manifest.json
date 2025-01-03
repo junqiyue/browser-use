@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Browser Automation Extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for browser automation using CDP",
+  "permissions": [
+    "debugger",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "dist/pages/popup/index.html"
+  },
+  "background": {
+    "service_worker": "dist/pages/background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/pages/content/index.js"]
+    }
+  ]
+}
