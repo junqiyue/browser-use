@@ -1,0 +1,32 @@
+{
+  "name": "browser_use_js",
+  "version": "1.0.0",
+  "description": "JavaScript port of browser-use automation library",
+  "type": "module",
+  "main": "index.js",
+  "browser": "index.js",
+  "scripts": {
+    "build": "pnpm run lint && node build.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "browser-automation",
+    "chrome-extension",
+    "cdp"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
