@@ -8,6 +8,7 @@ from browser_use.agent.views import ActionModel, ActionResult
 from browser_use.browser.context import BrowserContext
 from browser_use.controller.registry.service import Registry
 from browser_use.controller.views import (
+	ClickButtonByTextAction,
 	ClickElementAction,
 	DoneAction,
 	ExtractPageContentAction,
@@ -225,6 +226,58 @@ class Controller:
 			msg = f'⌨️  Sent keys: {params.keys}'
 			logger.info(msg)
 			return ActionResult(extracted_content=msg, include_in_memory=True)
+
+		@self.registry.action(
+			'Click a button on the page by its visible text content',
+			param_model=ClickButtonByTextAction,
+			requires_browser=True,
+		)
+		async def click_button_by_text(params: ClickButtonByTextAction, browser: BrowserContext):
+			page = await browser.get_current_page()
+			try:
+				# Try multiple strategies to find the button
+				locators = [
+					page.locator(f'button:has-text("{params.text}")'),
+					page.locator(f'[role="button"]:has-text("{params.text}")'),
+					page.locator(f'input[type="button"][value="{params.text}"]'),
+					page.locator(f'input[type="submit"][value="{params.text}"]'),
+					page.locator(f'a:has-text("{params.text}")'),
+				]
+
+				if params.exact_match:
+					locators = [
+						page.locator(f'button:text-is("{params.text}")'),
+						page.locator(f'[role="button"]:text-is("{params.text}")'),
+						page.locator(f'input[type="button"][value="{params.text}"]'),
+						page.locator(f'input[type="submit"][value="{params.text}"]'),
+						page.locator(f'a:text-is("{params.text}")'),
+					]
+
+				for locator in locators:
+					try:
+						if await locator.count() > 0 and await locator.first.is_visible():
+							initial_pages = len(page.context.pages)
+							await locator.first.click()
+							msg = f'🖱️  Clicked button with text "{params.text}"'
+							logger.info(msg)
+							if len(page.context.pages) > initial_pages:
+								new_tab_msg = 'New tab opened - switching to it'
+								msg += f' - {new_tab_msg}'
+								logger.info(new_tab_msg)
+								await browser.switch_to_tab(-1)
+							return ActionResult(extracted_content=msg, include_in_memory=True)
+					except Exception as e:
+						logger.debug(f'Locator attempt failed: {str(e)}')
+						continue
+
+				msg = f'Button with text "{params.text}" not found or not visible on page'
+				logger.info(msg)
+				return ActionResult(extracted_content=msg, include_in_memory=True)
+
+			except Exception as e:
+				msg = f'Failed to click button with text "{params.text}": {str(e)}'
+				logger.error(msg)
+				return ActionResult(error=msg, include_in_memory=True)
 
 		@self.registry.action(
 			description='If you dont find something which you want to interact with, scroll to it',
