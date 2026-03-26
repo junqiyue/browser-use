@@ -45,3 +45,8 @@ class ScrollAction(BaseModel):
 
 class SendKeysAction(BaseModel):
 	keys: str
+
+
+class ClickButtonByTextAction(BaseModel):
+	text: str
+	exact_match: Optional[bool] = False

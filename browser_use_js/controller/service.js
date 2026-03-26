@@ -9,6 +9,7 @@ import {
   SearchGoogleAction,
   GoToUrlAction,
   ClickElementAction,
+  ClickButtonByTextAction,
   InputTextAction,
   SwitchTabAction,
   OpenTabAction,
@@ -243,6 +244,64 @@ export class Controller {
         const page = await browser.getCurrentPage();
         await page.keyboard.press(params.keys);
         const msg = `⌨️ Sent keys: ${params.keys}`;
+        console.info(msg);
+        return { extractedContent: msg, includeInMemory: true };
+      });
+    });
+
+    this.registry.action(
+      'Click a button on the page by its visible text content',
+      ClickButtonByTextAction,
+      true
+    )((params, browser) => {
+      return this._executeWithResult(async () => {
+        const page = await browser.getCurrentPage();
+
+        let locators;
+        if (params.exactMatch) {
+          locators = [
+            page.locator(`button:text-is("${params.text}")`),
+            page.locator(`[role="button"]:text-is("${params.text}")`),
+            page.locator(`input[type="button"][value="${params.text}"]`),
+            page.locator(`input[type="submit"][value="${params.text}"]`),
+            page.locator(`a:text-is("${params.text}")`),
+          ];
+        } else {
+          locators = [
+            page.locator(`button:has-text("${params.text}")`),
+            page.locator(`[role="button"]:has-text("${params.text}")`),
+            page.locator(`input[type="button"][value="${params.text}"]`),
+            page.locator(`input[type="submit"][value="${params.text}"]`),
+            page.locator(`a:has-text("${params.text}")`),
+          ];
+        }
+
+        for (const locator of locators) {
+          try {
+            const count = await locator.count();
+            if (count > 0 && await locator.first().isVisible()) {
+              const initialPages = (await browser.context.pages()).length;
+              await locator.first().click();
+              let msg = `🖱️ Clicked button with text "${params.text}"`;
+              console.info(msg);
+
+              const currentPages = await browser.context.pages();
+              if (currentPages.length > initialPages) {
+                const newTabMsg = 'New tab opened - switching to it';
+                msg += ` - ${newTabMsg}`;
+                console.info(newTabMsg);
+                await browser.switchToTab(-1);
+              }
+
+              return { extractedContent: msg, includeInMemory: true };
+            }
+          } catch (e) {
+            console.debug(`Locator attempt failed: ${e.message}`);
+            continue;
+          }
+        }
+
+        const msg = `Button with text "${params.text}" not found or not visible on page`;
         console.info(msg);
         return { extractedContent: msg, includeInMemory: true };
       });

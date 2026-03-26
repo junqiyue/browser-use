@@ -208,3 +208,22 @@ export class SendKeysAction extends ActionModel {
     return typeof this.keys === 'string' && this.keys.length > 0;
   }
 }
+
+/**
+ * Click button by text action parameters
+ */
+export class ClickButtonByTextAction extends ActionModel {
+  /**
+   * @param {string} text - Button text to click
+   * @param {boolean} [exactMatch=false] - Whether to use exact text matching
+   */
+  constructor(text, exactMatch = false) {
+    super();
+    this.text = text;
+    this.exactMatch = exactMatch;
+  }
+
+  validate() {
+    return typeof this.text === 'string' && this.text.length > 0;
+  }
+}
